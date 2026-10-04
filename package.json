@@ -1,0 +1,13 @@
+{
+  "name": "browser-foundation-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Observable experiments for browser runtime behavior, caching, Web Workers, and Web Vitals.",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "web-vitals": "^6.2.0"
+  }
+}

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Browser Foundation Lab</title>
+    <script>
+      if (new URLSearchParams(window.location.search).get("slowLcp") === "true") {
+        document.documentElement.classList.add("slow-lcp-mode");
+      }
+    </script>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+    <script type="module" src="/performance.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Browser Foundation Lab</p>
+        <h1>Reservations</h1>
+        <p class="subtitle">HTML tạo cấu trúc, CSS tạo giao diện, JavaScript tạo hành vi.</p>
+      </div>
+      <span id="connection-status" class="connection-status">Chưa gọi API</span>
+    </header>
+
+    <main>
+      <div
+        id="slow-lcp-placeholder"
+        class="slow-lcp-placeholder"
+        aria-label="Đang chờ nội dung LCP"
+        hidden
+      ></div>
+
+      <section class="controls" aria-labelledby="controls-title">
+        <div>
+          <h2 id="controls-title">Điều khiển bài test</h2>
+          <p>Quan sát tab Network và Console trong Chrome DevTools khi bấm các nút.</p>
+        </div>
+
+        <div class="button-group">
+          <button id="load-button" type="button">Load reservations</button>
+          <button id="refresh-button" class="secondary-button" type="button">Force refetch</button>
+          <button id="clear-cache-button" class="secondary-button" type="button">Clear query cache</button>
+          <button id="create-button" type="button">Create + invalidate</button>
+          <button id="error-button" class="secondary-button" type="button">Test API error</button>
+          <button id="clear-button" class="secondary-button" type="button">Clear UI</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="query-cache-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="query-cache-title">Query Cache trong RAM của tab</h2>
+            <p class="section-description">
+              Query key: <code>reservations</code> · stale time: 10 giây
+            </p>
+          </div>
+          <strong id="cache-status" class="cache-status">EMPTY</strong>
+        </div>
+        <dl class="cache-details">
+          <div><dt>Stored at</dt><dd id="cache-stored-at">—</dd></div>
+          <div><dt>Age</dt><dd id="cache-age">—</dd></div>
+          <div><dt>Entries</dt><dd id="cache-entry-count">0</dd></div>
+          <div><dt>Observers</dt><dd id="cache-observers">1 (active)</dd></div>
+          <div><dt>GC time</dt><dd>5 giây</dd></div>
+          <div><dt>GC countdown</dt><dd id="gc-countdown">—</dd></div>
+        </dl>
+        <div class="button-group experiment-buttons">
+          <button id="unmount-button" class="secondary-button" type="button">Unmount reservation view</button>
+          <button id="mount-button" class="secondary-button" type="button" disabled>Mount reservation view</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="main-thread-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="main-thread-title">Main thread experiment</h2>
+            <p class="section-description">
+              Đồng hồ phải tiếp tục chạy. So sánh việc nặng trên main thread và trong Web Worker.
+            </p>
+          </div>
+          <strong id="live-clock" class="live-clock">--:--:--</strong>
+        </div>
+
+        <div class="button-group experiment-buttons">
+          <button id="block-button" class="danger-button" type="button">Block main thread 3s</button>
+          <button id="worker-button" type="button">Run in Web Worker 3s</button>
+        </div>
+
+        <div id="experiment-result" class="message" role="status" aria-live="polite">
+          Chưa chạy thí nghiệm.
+        </div>
+      </section>
+
+      <section aria-labelledby="performance-title">
+        <div class="section-heading">
+          <div>
+            <h2 id="performance-title">Browser Performance</h2>
+            <p class="section-description">Được đo trực tiếp trong browser bằng Performance APIs.</p>
+          </div>
+          <button id="send-telemetry-button" class="secondary-button" type="button">Send telemetry</button>
+        </div>
+
+        <div class="performance-grid">
+          <article><span>Page load</span><strong id="metric-page-load">—</strong></article>
+          <article><span>LCP</span><strong id="metric-lcp">—</strong></article>
+          <article><span>INP</span><strong id="metric-inp">—</strong></article>
+          <article><span>CLS</span><strong id="metric-cls">0.000</strong></article>
+          <article><span>Long tasks</span><strong id="metric-long-tasks">0</strong></article>
+          <article><span>Longest task</span><strong id="metric-longest-task">—</strong></article>
+        </div>
+
+        <h3 class="metric-subtitle">Core Web Vitals chuẩn — thư viện <code>web-vitals</code></h3>
+        <div class="performance-grid official-vitals-grid">
+          <article><span>LCP chuẩn</span><strong id="metric-official-lcp">—</strong><small id="rating-official-lcp">waiting</small></article>
+          <article><span>INP chuẩn</span><strong id="metric-official-inp">—</strong><small id="rating-official-inp">waiting</small></article>
+          <article><span>CLS chuẩn</span><strong id="metric-official-cls">—</strong><small id="rating-official-cls">waiting</small></article>
+        </div>
+
+        <div class="button-group experiment-buttons">
+          <button id="slow-lcp-button" class="secondary-button" type="button">Reload with slow LCP</button>
+          <button id="cls-button" class="secondary-button" type="button">Create layout shift</button>
+        </div>
+
+        <div id="telemetry-message" class="message" role="status" aria-live="polite">
+          Measurements chưa được gửi tới server.
+        </div>
+      </section>
+
+      <section id="reservation-view" aria-labelledby="result-title">
+        <div class="section-heading">
+          <h2 id="result-title">Kết quả</h2>
+          <span id="request-duration">—</span>
+        </div>
+
+        <div id="message" class="message" role="status" aria-live="polite">
+          Bấm “Load reservations” để bắt đầu.
+        </div>
+
+        <div id="reservation-list" class="reservation-grid"></div>
+      </section>
+
+      <section class="event-log" aria-labelledby="event-log-title">
+        <div class="section-heading">
+          <h2 id="event-log-title">Luồng vừa xảy ra</h2>
+          <button id="clear-log-button" class="text-button" type="button">Xóa log</button>
+        </div>
+        <ol id="event-log-list">
+          <li>HTML đã được browser parse thành DOM.</li>
+          <li>CSS đã được tải để browser tính style và layout.</li>
+          <li>JavaScript đang chờ thao tác click.</li>
+        </ol>
+      </section>
+    </main>
+  </body>
+</html>
